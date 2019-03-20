@@ -1,0 +1,1160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<itop_design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0">
+  <classes>
+    <class id="SoftwareInstance">
+      <fields>
+        <field id="system_id" xsi:type="AttributeExternalKey">
+          <is_null_allowed _delta="redefine">true</is_null_allowed>
+        </field>
+      </fields>
+    </class>
+    <class id="Software" _delta="must_exist">
+        <fields>
+          <field id="type" xsi:type="AttributeEnum" _delta="must_exist">
+            <values>
+              <value id="DBCluster" _delta="define">DBCluster</value>
+              <value id="WebCluster" _delta="define">WebCluster</value>
+            </values>
+        </field>
+    	</fields>
+    </class>
+    <class id="WebServer" _delta="must_exist">
+      <fields>
+        <field id="webcluster_list" xsi:type="AttributeLinkedSet" _delta="define">
+          <linked_class>lnkWebClusterToSoftwareInstance</linked_class>
+          <ext_key_to_me>softwareinstance_id</ext_key_to_me>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+          <ext_key_to_remote>webcluster_id</ext_key_to_remote>
+          <duplicates/>
+        </field>
+        <field id="webapp_list" xsi:type="AttributeLinkedSet" _delta="redefine">
+          <linked_class>WebApplication</linked_class>
+          <ext_key_to_me>softwareinstance_id</ext_key_to_me>
+          <edit_mode>in_place</edit_mode>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+        </field>
+      </fields>
+      <methods>
+        <method id="GetRelationQueries" _delta="redefine">
+          <static>true</static>
+          <access>public</access>
+          <type>Overload-DBObject</type>
+          <code><![CDATA[       public static function GetRelationQueries($sRelCode)
+        {
+                switch ($sRelCode)
+                {
+                        case "impacts":
+                        $aRels = array(
+                          "WebApplication" => array("sQuery"=>"SELECT WebApplication AS db WHERE softwareinstance_id = :this->id", "bPropagate"=>true, "iDistance"=>5),
+ 			  "WebCluster" => array("sQuery"=>"SELECT WebCluster AS webc JOIN lnkWebClusterToSoftwareInstance AS l1 ON l1.webcluster_id= webc.id WHERE l1.softwareinstance_id = :this->id", "bPropagate"=>true, "iDistance"=>10),
+                        );
+                        return array_merge($aRels, parent::GetRelationQueries($sRelCode));
+                        break;
+
+                        case 'depends on':
+                        $aRels = array(
+
+                        );
+                        return array_merge($aRels, parent::GetRelationQueries($sRelCode));
+                        break;
+
+                        default:
+                        return parent::GetRelationQueries($sRelCode);
+                }
+        }]]></code>
+        </method>
+      </methods>
+      <presentation>
+        <details>
+          <items>
+            <item id="webcluster_list" _delta="define">
+              <rank>105</rank>
+            </item>
+          </items>
+        </details>
+      </presentation>
+    </class>
+    <class id="DBServer" _delta="must_exist">
+      <fields>
+        <field id="dbcluster_list" xsi:type="AttributeLinkedSet" _delta="define">
+          <linked_class>lnkDBClusterToSoftwareInstance</linked_class>
+          <ext_key_to_me>softwareinstance_id</ext_key_to_me>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+          <ext_key_to_remote>dbcluster_id</ext_key_to_remote>
+          <duplicates/>
+        </field>
+        <field id="dbschema_list" xsi:type="AttributeLinkedSet" _delta="redefine">
+          <linked_class>DatabaseSchema</linked_class>
+          <ext_key_to_me>softwareinstance_id</ext_key_to_me>
+          <edit_mode>in_place</edit_mode>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+        </field>
+      </fields>
+      <methods>
+        <method id="GetRelationQueries" _delta="redefine">
+          <static>true</static>
+          <access>public</access>
+          <type>Overload-DBObject</type>
+          <code><![CDATA[       public static function GetRelationQueries($sRelCode)
+        {
+                switch ($sRelCode)
+                {
+                        case "impacts":
+                        $aRels = array(
+                          "DatabaseSchema" => array("sQuery"=>"SELECT DatabaseSchema AS db WHERE softwareinstance_id = :this->id", "bPropagate"=>true, "iDistance"=>5),
+ 			  "DBCluster" => array("sQuery"=>"SELECT DBCluster AS dbc JOIN lnkDBClusterToSoftwareInstance AS l1 ON l1.dbcluster_id= dbc.id WHERE l1.softwareinstance_id = :this->id", "bPropagate"=>true, "iDistance"=>10),
+                        );
+                        return array_merge($aRels, parent::GetRelationQueries($sRelCode));
+                        break;
+
+                        case 'depends on':
+                        $aRels = array(
+
+                        );
+                        return array_merge($aRels, parent::GetRelationQueries($sRelCode));
+                        break;
+
+                        default:
+                        return parent::GetRelationQueries($sRelCode);
+                }
+        }]]></code>
+        </method>
+      </methods>
+      <presentation>
+        <details>
+          <items>
+            <item id="dbcluster_list" _delta="define">
+              <rank>105</rank>
+            </item>
+          </items>
+        </details>
+      </presentation>
+    </class>
+    <class id="DatabaseSchema" _delta="must_exist">
+	    <properties>
+        <obsolescence>
+          <condition _delta="redefine">softwareinstance_id_obsolescence_flag</condition>
+        </obsolescence>
+      </properties>
+      <fields>
+        <field id="dbserver_id" _delta="delete" />
+        <field id="dbserver_name" _delta="delete"/>
+        <field id="softwareinstance_id" xsi:type="AttributeExternalKey" _delta="define">
+          <sql>dbserver_id</sql>
+          <sql>softwareinstance_id</sql>
+          <target_class>SoftwareInstance</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_MANUAL</on_target_delete>
+          <allow_target_creation>false</allow_target_creation> 
+          <filter><![CDATA[SELECT SoftwareInstance WHERE finalclass IN ('DBCluster','DBServer')]]></filter>
+        </field>
+        <field id="softwareinstance_name" xsi:type="AttributeExternalField" _delta="define">
+          <extkey_attcode>softwareinstance_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+        <field id="webapplications_list" xsi:type="AttributeLinkedSetIndirect" _delta="define">
+          <linked_class>lnkDatabaseSchemaToWebApplication</linked_class>
+          <ext_key_to_me>databaseinstance_id</ext_key_to_me>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+          <ext_key_to_remote>webapplication_id</ext_key_to_remote>
+          <duplicates/>
+        </field>
+      </fields>
+      <methods>
+        <method id="GetRelationQueries" _delta="redefine">
+          <static>true</static>
+          <access>public</access>
+          <type>Overload-DBObject</type>
+          <code><![CDATA[	public static function GetRelationQueries($sRelCode)
+          {
+            switch ($sRelCode)
+            {
+              case "impacts":
+              $aRels = array(
+                "WebApplication" => array("sQuery"=>"SELECT WebApplication AS web JOIN lnkDatabaseSchemaToWebApplication AS l1 ON l1.webapplication_id=web.id WHERE l1.databaseinstance_id = :this->id", "bPropagate"=>true, "iDistance"=>10),
+              );
+              return array_merge($aRels, parent::GetRelationQueries($sRelCode));
+              break;
+              
+              case 'depends on':
+              $aRels = array(
+                "SoftwareInstance" => array("sQuery"=>"SELECT SoftwareInstance AS SI WHERE SI.id = :this->softwareinstance_id", "bPropagate"=>true, "iDistance"=>5),
+              );
+              return array_merge($aRels, parent::GetRelationQueries($sRelCode));
+              break;
+              
+              default:
+              return parent::GetRelationQueries($sRelCode);			
+            }
+         }]]></code>
+        </method>
+      </methods>
+      <presentation>
+        <details>
+          <items>
+            <item id="dbserver_id" _delta="delete">
+              <rank>30</rank>
+            </item>
+            <item id="softwareinstance_id" _delta="define">
+              <rank>35</rank>
+            </item>
+            <item id="webapplications_list" _delta="define">
+              <rank>105</rank>
+            </item>
+         </items>
+       </details>
+     </presentation>
+    </class>
+    <class id="WebApplication" _delta="must_exist">
+	    <properties>
+        <obsolescence>
+          <condition _delta="redefine">softwareinstance_id_obsolescence_flag</condition>
+        </obsolescence>
+      </properties>
+      <fields>
+        <field id="webserver_id" _delta="delete" />
+        <field id="webserver_name" _delta="delete"/>
+        <field id="softwareinstance_id" xsi:type="AttributeExternalKey" _delta="define">
+          <sql>webserver_id</sql>
+          <sql>softwareinstance_id</sql>
+          <target_class>SoftwareInstance</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_MANUAL</on_target_delete>
+          <allow_target_creation>false</allow_target_creation> 
+          <filter><![CDATA[SELECT SoftwareInstance WHERE finalclass IN ('WebCluster','WebServer')]]></filter>
+        </field>
+        <field id="dbschema_list" xsi:type="AttributeLinkedSetIndirect" _delta="define">
+          <linked_class>lnkDatabaseSchemaToWebApplication</linked_class>
+          <ext_key_to_me>webapplication_id</ext_key_to_me>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+          <ext_key_to_remote>databaseinstance_id</ext_key_to_remote>
+          <duplicates/>
+        </field>
+      </fields>
+      <methods>
+        <method id="GetRelationQueries" _delta="redefine">
+          <static>true</static>
+          <access>public</access>
+          <type>Overload-DBObject</type>
+          <code><![CDATA[       public static function GetRelationQueries($sRelCode)
+        {
+                switch ($sRelCode)
+                {
+                        case "impacts":
+                        $aRels = array(
+                        );
+                        return array_merge($aRels, parent::GetRelationQueries($sRelCode));
+                        break;
+
+                        case 'depends on':
+                        $aRels = array(
+                                "SoftwareInstance" => array("sQuery"=>"SELECT SoftwareInstance AS SI WHERE SI.id = :this->softwareinstance_id", "bPropagate"=>true, "iDistance"=>5),
+                                "DatabaseSchema" => array("sQuery"=>"SELECT DatabaseSchema AS db JOIN lnkDatabaseSchemaToWebApplication AS l1 ON l1.databaseinstance_id=db.id WHERE l1.webapplication_id = :this->id", "bPropagate"=>true, "iDistance"=>10),
+
+                        );
+                        return array_merge($aRels, parent::GetRelationQueries($sRelCode));
+                        break;
+
+                        default:
+                        return parent::GetRelationQueries($sRelCode);
+                }
+        }]]></code>
+        </method>
+      </methods>
+      <presentation>
+        <details>
+          <items>
+            <item id="webserver_id" _delta="delete">
+              <rank>30</rank>
+            </item>
+            <item id="softwareinstance_id" _delta="define">
+              <rank>35</rank>
+            </item>
+            <item id="dbschema_list" _delta="define">
+              <rank>115</rank>
+            </item>
+            <item id="providercontracts_list">
+              <rank>120</rank>
+            </item>
+            <item id="services_list">
+              <rank>130</rank>
+            </item>
+          </items>
+        </details>
+      </presentation>
+    </class>
+    <class id="lnkDatabaseSchemaToWebApplication" _delta="define">
+      <parent>cmdbAbstractObject</parent>
+      <properties>
+        <is_link>1</is_link>
+        <category>bizmodel</category>
+        <abstract>false</abstract>
+        <key_type>autoincrement</key_type>
+        <db_table>lnkdatabaseschematowebapplication</db_table>
+        <db_key_field>id</db_key_field>
+        <db_final_class_field/>
+        <naming>
+          <format>%1$s %2$s</format>
+          <attributes>
+            <attribute id="databaseinstance_id"/>
+            <attribute id="webapplication_id"/>
+          </attributes>
+        </naming>
+        <display_template/>
+        <icon/>
+        <reconciliation>
+          <attributes>
+            <attribute id="databaseinstance_id"/>
+            <attribute id="webapplication_id"/>
+          </attributes>
+        </reconciliation>
+      </properties>
+      <fields>
+        <field id="databaseinstance_id" xsi:type="AttributeExternalKey">
+          <sql>databaseinstance_id</sql>
+          <target_class>DatabaseSchema</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+        <field id="databaseinstance_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>databaseinstance_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+        <field id="webapplication_id" xsi:type="AttributeExternalKey">
+          <sql>webapplication_id</sql>
+          <target_class>WebApplication</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+        <field id="webapplication_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>webapplication_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+      </fields>
+      <methods/>
+      <presentation>
+        <details>
+          <items>
+            <item id="databaseinstance_id">
+              <rank>10</rank>
+            </item>
+            <item id="webapplication_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="databaseinstance_id">
+              <rank>10</rank>
+            </item>
+            <item id="webapplication_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="databaseinstance_id">
+              <rank>10</rank>
+            </item>
+            <item id="webapplication_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+    <class id="lnkDBClusterToVolume" _delta="define">
+      <parent>cmdbAbstractObject</parent>
+      <properties>
+        <is_link>1</is_link>
+        <category>bizmodel,configmgmt</category>
+        <abstract>false</abstract>
+        <key_type>autoincrement</key_type>
+        <db_table>lnkdbclustertovolume</db_table>
+        <db_key_field>id</db_key_field>
+        <db_final_class_field/>
+        <naming>
+          <format>%1$s</format>
+          <attributes>
+            <attribute id="volume_id"/>
+          </attributes>
+        </naming>
+        <display_template/>
+        <icon/>
+        <reconciliation>
+          <attributes>
+            <attribute id="volume_id"/>
+            <attribute id="dbcluster_id"/>
+          </attributes>
+        </reconciliation>
+      </properties>
+      <fields>
+        <field id="volume_id" xsi:type="AttributeExternalKey">
+          <sql>volume_id</sql>
+          <target_class>LogicalVolume</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+        <field id="volume_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>volume_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+        <field id="dbcluster_id" xsi:type="AttributeExternalKey">
+          <sql>dbcluster_id</sql>
+          <target_class>DBCluster</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+        <field id="dbcluster_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>dbcluster_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+      </fields>
+      <methods/>
+      <presentation>
+        <details>
+          <items>
+            <item id="volume_id">
+              <rank>10</rank>
+            </item>
+            <item id="dbcluster_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="volume_id">
+              <rank>10</rank>
+            </item>
+            <item id="dbcluster_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="volume_id">
+              <rank>10</rank>
+            </item>
+            <item id="dbcluster_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+    <class id="WebCluster" _delta="define">
+      <parent>SoftwareInstance</parent>
+      <properties>
+        <category>bizmodel,searchable</category>
+        <abstract>false</abstract>
+        <key_type>autoincrement</key_type>
+        <db_table>webcluster</db_table>
+        <db_key_field>id</db_key_field>
+        <db_final_class_field/>
+        <naming>
+          <format>%1$s</format>
+          <attributes>
+            <attribute id="name"/>
+          </attributes>
+        </naming>
+        <display_template/>
+        <icon>images/dbcluster.png</icon>
+        <reconciliation>
+          <attributes>
+            <attribute id="name"/>
+            <attribute id="org_id"/>
+            <attribute id="organization_name"/>
+          </attributes>
+        </reconciliation>
+      </properties>
+      <fields>
+        <field id="webnode_list" xsi:type="AttributeLinkedSetIndirect">
+          <linked_class>lnkWebClusterToSoftwareInstance</linked_class>
+          <ext_key_to_me>webcluster_id</ext_key_to_me>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+          <ext_key_to_remote>softwareinstance_id</ext_key_to_remote>
+          <duplicates/>
+        </field>
+        <field id="webapp_list" xsi:type="AttributeLinkedSet">
+          <linked_class>WebApplication</linked_class>
+          <ext_key_to_me>softwareinstance_id</ext_key_to_me>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+        </field>
+        <field id="cluster_type" xsi:type="AttributeEnum">
+          <values>
+            <value>Fail-over</value>
+            <value>Master/Slave</value>
+            <value>Active/Active</value>
+            <value>Active/Standby</value>
+          </values>
+          <sql>cluster_type</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+          <display_style>radio_vertical</display_style>
+        </field>
+      </fields>
+      <methods>
+        <method id="GetRelationQueries">
+          <static>true</static>
+          <access>public</access>
+          <type>Overload-DBObject</type>
+          <code><![CDATA[    public static function GetRelationQueries($sRelCode)
+            {
+                switch ($sRelCode)
+                {
+                    case "impacts":
+                    $aRels = array(
+                        "WebApplication" => array("sQuery"=>"SELECT WebApplication AS db WHERE softwareinstance_id = :this->id", "bPropagate"=>true, "iDistance"=>5),
+                    );
+                    return array_merge($aRels, parent::GetRelationQueries($sRelCode));
+                    break;
+                    
+                    case 'depends on':
+                    $aRels = array(
+                        "SoftwareInstance" => array("sQuery"=>"SELECT SoftwareInstance AS s JOIN lnkWebClusterToSoftwareInstance AS l1 ON l1.softwareinstance_id=s.id WHERE l1.webcluster_id = :this->id","bPropagate"=>true, "iDistance"=>10),
+                    );
+                    return array_merge($aRels, parent::GetRelationQueries($sRelCode));
+                    break;
+                    
+                    default:
+                    return parent::GetRelationQueries($sRelCode);            
+                }
+            }]]></code>
+        </method>
+      </methods>
+      <presentation>
+        <details>
+          <items>
+            <item id="name">
+              <rank>10</rank>
+            </item>
+            <item id="org_id">
+              <rank>20</rank>
+            </item>
+            <item id="status">
+              <rank>30</rank>
+            </item>
+            <item id="business_criticity">
+              <rank>40</rank>
+            </item>
+            <item id="software_id" _delta="delete">
+              <rank>60</rank>
+            </item>
+            <item id="softwarelicence_id" _delta="delete">
+              <rank>70</rank>
+            </item>
+            <item id="cluster_type" _delta="delete">
+              <rank>75</rank>
+            </item>
+            <item id="path">
+              <rank>80</rank>
+            </item>
+            <item id="move2production">
+              <rank>90</rank>
+            </item>
+            <item id="description">
+              <rank>100</rank>
+            </item>
+            <item id="contacts_list">
+              <rank>110</rank>
+            </item>
+            <item id="documents_list">
+              <rank>120</rank>
+            </item>
+            <item id="tickets_list">
+              <rank>130</rank>
+            </item>
+            <item id="applicationsolution_list">
+              <rank>140</rank>
+            </item>
+            <item id="webnode_list">
+              <rank>145</rank>
+            </item>
+            <item id="webapp_list">
+              <rank>150</rank>
+            </item>
+            <item id="providercontracts_list">
+              <rank>160</rank>
+            </item>
+            <item id="services_list">
+              <rank>170</rank>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="name">
+              <rank>10</rank>
+            </item>
+            <item id="org_id">
+              <rank>20</rank>
+            </item>
+            <item id="business_criticity">
+              <rank>30</rank>
+            </item>
+            <item id="move2production">
+              <rank>40</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="org_id">
+              <rank>10</rank>
+            </item>
+            <item id="business_criticity">
+              <rank>20</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+    <class id="DBCluster" _delta="define">
+      <parent>SoftwareInstance</parent>
+      <properties>
+        <category>bizmodel,searchable</category>
+        <abstract>false</abstract>
+        <key_type>autoincrement</key_type>
+        <db_table>dbcluster</db_table>
+        <db_key_field>id</db_key_field>
+        <db_final_class_field/>
+        <naming>
+          <format>%1$s</format>
+          <attributes>
+            <attribute id="name"/>
+          </attributes>
+        </naming>
+        <display_template/>
+        <icon>images/dbcluster.png</icon>
+        <reconciliation>
+          <attributes>
+            <attribute id="name"/>
+            <attribute id="org_id"/>
+            <attribute id="organization_name"/>
+          </attributes>
+        </reconciliation>
+      </properties>
+      <fields>
+        <field id="dbnode_list" xsi:type="AttributeLinkedSetIndirect">
+          <linked_class>lnkDBClusterToSoftwareInstance</linked_class>
+          <ext_key_to_me>dbcluster_id</ext_key_to_me>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+          <ext_key_to_remote>softwareinstance_id</ext_key_to_remote>
+          <duplicates/>
+        </field>
+        <field id="dbschema_list" xsi:type="AttributeLinkedSet">
+          <linked_class>DatabaseSchema</linked_class>
+          <ext_key_to_me>softwareinstance_id</ext_key_to_me>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+        </field>
+        <field id="volume_list" xsi:type="AttributeLinkedSet" _delta="define">
+          <linked_class>lnkDBClusterToVolume</linked_class>
+          <ext_key_to_me>dbcluster_id</ext_key_to_me>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+          <ext_key_to_remote>volume_id</ext_key_to_remote>
+          <duplicates/>
+        </field>
+        <field id="cluster_type" xsi:type="AttributeEnum">
+          <values>
+            <value>Fail-over</value>
+            <value>Master/Slave</value>
+            <value>Active/Active</value>
+            <value>Active/Standby</value>
+          </values>
+          <sql>cluster_type</sql>
+          <default_value/>
+          <is_null_allowed>true</is_null_allowed>
+          <display_style>radio_vertical</display_style>
+        </field>
+      </fields>
+      <methods>
+        <method id="GetRelationQueries">
+          <static>true</static>
+          <access>public</access>
+          <type>Overload-DBObject</type>
+          <code><![CDATA[    public static function GetRelationQueries($sRelCode)
+            {
+                switch ($sRelCode)
+                {
+                    case "impacts":
+                    $aRels = array(
+                        "DatabaseSchema" => array("sQuery"=>"SELECT DatabaseSchema AS db WHERE softwareinstance_id = :this->id", "bPropagate"=>true, "iDistance"=>5),
+                    );
+                    return array_merge($aRels, parent::GetRelationQueries($sRelCode));
+                    break;
+                    
+                    case 'depends on':
+                    $aRels = array(
+                        "SoftwareInstance" => array("sQuery"=>"SELECT SoftwareInstance AS s JOIN lnkDBClusterToSoftwareInstance AS l1 ON l1.softwareinstance_id=s.id WHERE l1.dbcluster_id = :this->id","bPropagate"=>true, "iDistance"=>10),
+                        "LogicalVolume" => array("sQuery"=>"SELECT LogicalVolume AS volume JOIN lnkDBClusterToVolume AS l1 ON l1.volume_id=volume.id WHERE l1.dbcluster_id = :this->id", "bPropagate"=>true, "iDistance"=>5),
+                    );
+                    return array_merge($aRels, parent::GetRelationQueries($sRelCode));
+                    break;
+                    
+                    default:
+                    return parent::GetRelationQueries($sRelCode);            
+                }
+            }]]></code>
+        </method>
+      </methods>
+      <presentation>
+        <details>
+          <items>
+            <item id="name">
+              <rank>10</rank>
+            </item>
+            <item id="org_id">
+              <rank>20</rank>
+            </item>
+            <item id="status">
+              <rank>30</rank>
+            </item>
+            <item id="business_criticity">
+              <rank>40</rank>
+            </item>
+            <item id="software_id" _delta="delete">
+              <rank>60</rank>
+            </item>
+            <item id="softwarelicence_id" _delta="delete">
+              <rank>70</rank>
+            </item>
+            <item id="cluster_type" _delta="delete">
+              <rank>75</rank>
+            </item>
+            <item id="path">
+              <rank>80</rank>
+            </item>
+            <item id="move2production">
+              <rank>90</rank>
+            </item>
+            <item id="description">
+              <rank>100</rank>
+            </item>
+            <item id="contacts_list">
+              <rank>110</rank>
+            </item>
+            <item id="documents_list">
+              <rank>120</rank>
+            </item>
+            <item id="tickets_list">
+              <rank>130</rank>
+            </item>
+            <item id="applicationsolution_list">
+              <rank>140</rank>
+            </item>
+            <item id="dbnode_list">
+              <rank>145</rank>
+            </item>
+            <item id="dbschema_list">
+              <rank>150</rank>
+            </item>
+            <item id="providercontracts_list">
+              <rank>160</rank>
+            </item>
+            <item id="services_list">
+              <rank>170</rank>
+            </item>
+            <item id="volume_list">
+              <rank>180</rank>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="name">
+              <rank>10</rank>
+            </item>
+            <item id="org_id">
+              <rank>20</rank>
+            </item>
+            <item id="business_criticity">
+              <rank>30</rank>
+            </item>
+            <item id="move2production">
+              <rank>40</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="org_id">
+              <rank>10</rank>
+            </item>
+            <item id="business_criticity">
+              <rank>20</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+    <class id="lnkDBClusterToSoftwareInstance" _delta="define">
+      <parent>cmdbAbstractObject</parent>
+      <properties>
+        <is_link>1</is_link>
+        <category>bizmodel</category>
+        <abstract>false</abstract>
+        <key_type>autoincrement</key_type>
+        <db_table>lnkdbclustertosoftwareinstance</db_table>
+        <db_key_field>id</db_key_field>
+        <db_final_class_field/>
+        <naming>
+          <format>%1$s %2$s</format>
+          <attributes>
+            <attribute id="dbcluster_id"/>
+            <attribute id="softwareinstance_id"/>
+          </attributes>
+        </naming>
+        <display_template/>
+        <icon/>
+        <reconciliation>
+          <attributes>
+            <attribute id="dbcluster_id"/>
+            <attribute id="softwareinstance_id"/>
+          </attributes>
+        </reconciliation>
+      </properties>
+      <fields>
+        <field id="dbcluster_id" xsi:type="AttributeExternalKey">
+          <sql>dbcluster_id</sql>
+          <target_class>DBCluster</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+        <field id="dbcluster_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>dbcluster_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+        <field id="softwareinstance_id" xsi:type="AttributeExternalKey">
+          <sql>softwareinstance_id</sql>
+          <target_class>DBServer</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+        <field id="softwareinstance_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>softwareinstance_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+      </fields>
+      <methods/>
+      <presentation>
+        <details>
+          <items>
+            <item id="dbcluster_id">
+              <rank>10</rank>
+            </item>
+            <item id="softwareinstance_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="dbcluster_id">
+              <rank>10</rank>
+            </item>
+            <item id="softwareinstance_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="dbcluster_id">
+              <rank>10</rank>
+            </item>
+            <item id="softwareinstance_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+    <class id="lnkWebClusterToSoftwareInstance" _delta="define">
+      <parent>cmdbAbstractObject</parent>
+      <properties>
+        <is_link>1</is_link>
+        <category>bizmodel</category>
+        <abstract>false</abstract>
+        <key_type>autoincrement</key_type>
+        <db_table>lnkwebclustertosoftwareinstance</db_table>
+        <db_key_field>id</db_key_field>
+        <db_final_class_field/>
+        <naming>
+          <format>%1$s %2$s</format>
+          <attributes>
+            <attribute id="webcluster_id"/>
+            <attribute id="softwareinstance_id"/>
+          </attributes>
+        </naming>
+        <display_template/>
+        <icon/>
+        <reconciliation>
+          <attributes>
+            <attribute id="webcluster_id"/>
+            <attribute id="softwareinstance_id"/>
+          </attributes>
+        </reconciliation>
+      </properties>
+      <fields>
+        <field id="webcluster_id" xsi:type="AttributeExternalKey">
+          <sql>dbcluster_id</sql>
+          <target_class>WebCluster</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+        <field id="webcluster_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>webcluster_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+        <field id="softwareinstance_id" xsi:type="AttributeExternalKey">
+          <sql>softwareinstance_id</sql>
+          <target_class>WebServer</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+        <field id="softwareinstance_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>softwareinstance_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+      </fields>
+      <methods/>
+      <presentation>
+        <details>
+          <items>
+            <item id="webcluster_id">
+              <rank>10</rank>
+            </item>
+            <item id="softwareinstance_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="webcluster_id">
+              <rank>10</rank>
+            </item>
+            <item id="softwareinstance_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="webcluster_id">
+              <rank>10</rank>
+            </item>
+            <item id="softwareinstance_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+
+    <class id="lnkDBServerToDBCluster" _delta="define">
+      <parent>cmdbAbstractObject</parent>
+      <properties>
+        <is_link>1</is_link>
+        <category>bizmodel</category>
+        <abstract>false</abstract>
+        <key_type>autoincrement</key_type>
+        <db_table>lnkdbservertodbcluster</db_table>
+        <db_key_field>id</db_key_field>
+        <db_final_class_field/>
+        <naming>
+          <format>%1$s %2$s</format>
+          <attributes>
+            <attribute id="dbserver_id"/>
+            <attribute id="dbcluster_id"/>
+          </attributes>
+        </naming>
+        <display_template/>
+        <icon/>
+        <reconciliation>
+          <attributes>
+            <attribute id="dbserver_id"/>
+            <attribute id="dbcluster_id"/>
+          </attributes>
+        </reconciliation>
+      </properties>
+      <fields>
+        <field id="dbserver_id" xsi:type="AttributeExternalKey">
+          <sql>dbserver_id</sql>
+          <target_class>DBServer</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+        <field id="dbserver_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>dbserver_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+        <field id="dbcluster_id" xsi:type="AttributeExternalKey">
+          <sql>dbcluster_id</sql>
+          <target_class>DBCluster</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+        <field id="dbcluster_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>dbcluster_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+      </fields>
+      <methods/>
+      <presentation>
+        <details>
+          <items>
+            <item id="dbserver_id">
+              <rank>10</rank>
+            </item>
+            <item id="dbcluster_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="dbserver_id">
+              <rank>10</rank>
+            </item>
+            <item id="dbcluster_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="dbserver_id">
+              <rank>10</rank>
+            </item>
+            <item id="dbcluster_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+    <class id="lnkWebServerToWebCluster" _delta="define">
+      <parent>cmdbAbstractObject</parent>
+      <properties>
+        <is_link>1</is_link>
+        <category>bizmodel</category>
+        <abstract>false</abstract>
+        <key_type>autoincrement</key_type>
+        <db_table>lnkwebservertowebcluster</db_table>
+        <db_key_field>id</db_key_field>
+        <db_final_class_field/>
+        <naming>
+          <format>%1$s %2$s</format>
+          <attributes>
+            <attribute id="webserver_id"/>
+            <attribute id="webcluster_id"/>
+          </attributes>
+        </naming>
+        <display_template/>
+        <icon/>
+        <reconciliation>
+          <attributes>
+            <attribute id="webserver_id"/>
+            <attribute id="webcluster_id"/>
+          </attributes>
+        </reconciliation>
+      </properties>
+      <fields>
+        <field id="webserver_id" xsi:type="AttributeExternalKey">
+          <sql>webserver_id</sql>
+          <target_class>WebServer</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+        <field id="webserver_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>webserver_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+        <field id="webcluster_id" xsi:type="AttributeExternalKey">
+          <sql>webcluster_id</sql>
+          <target_class>WebCluster</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+        <field id="webcluster_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>webcluster_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+      </fields>
+      <methods/>
+      <presentation>
+        <details>
+          <items>
+            <item id="webserver_id">
+              <rank>10</rank>
+            </item>
+            <item id="webcluster_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="webserver_id">
+              <rank>10</rank>
+            </item>
+            <item id="webcluster_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="webserver_id">
+              <rank>10</rank>
+            </item>
+            <item id="webcluster_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+  </classes>
+
+  <menus>
+    <menu id="ConfigManagementOverview" xsi:type="DashboardMenuNode" _delta="must_exist">
+      <definition>
+        <cells>
+          <cell id="3" _delta="must_exist">
+            <dashlets>
+              <dashlet id="111" xsi:type="DashletBadge" _delta="define">
+                <rank>111</rank>
+                <class>DBCluster</class>
+              </dashlet>
+            </dashlets>
+          </cell>
+        </cells>
+      </definition>
+    </menu>
+
+  
+  </menus>
+  <user_rights>
+    <groups>
+    </groups>
+    <profiles>
+    </profiles>
+  </user_rights>
+</itop_design>
