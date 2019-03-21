@@ -10,11 +10,11 @@ This extension implements some new cluster related classes and extends some of t
 ## New and Extended classes
 These new Classes are visible and useable from the iTop web interface.
 
-* DBCluster (eew)
-* WebCluster (eew)
+* DBCluster (new)
+* WebCluster (new)
 * DBServer (extended)
-* WebServer (extented)
-* Database Schema (extened)
+* WebServer (extended)
+* Database Schema (extended)
 * Web Application
 
 ### DBServer / DBCluster / Database Schema
