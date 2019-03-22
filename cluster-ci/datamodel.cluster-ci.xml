@@ -20,7 +20,7 @@
     </class>
     <class id="WebServer" _delta="must_exist">
       <fields>
-        <field id="webcluster_list" xsi:type="AttributeLinkedSet" _delta="define">
+        <field id="webcluster_list" xsi:type="AttributeLinkedSetIndirect" _delta="define">
           <linked_class>lnkWebClusterToSoftwareInstance</linked_class>
           <ext_key_to_me>softwareinstance_id</ext_key_to_me>
           <count_min>0</count_min>
@@ -78,7 +78,7 @@
     </class>
     <class id="DBServer" _delta="must_exist">
       <fields>
-        <field id="dbcluster_list" xsi:type="AttributeLinkedSet" _delta="define">
+        <field id="dbcluster_list" xsi:type="AttributeLinkedSetIndirect" _delta="define">
           <linked_class>lnkDBClusterToSoftwareInstance</linked_class>
           <ext_key_to_me>softwareinstance_id</ext_key_to_me>
           <count_min>0</count_min>
