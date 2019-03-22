@@ -22,6 +22,8 @@ Dict::Add('EN US', 'English', 'English', array(
 
 	'Class:DBServer/Attribute:dbcluster_list' => 'DB Clusters',
 	'Class:DBServer/Attribute:dbcluster_list+' => '',
+	'Class:DBServer/Attribute:dbcluster_id' => 'DB Cluster',
+	'Class:DBServer/Attribute:dbcluster_id+' => '',
 
 	'Class:DatabaseSchema/Attribute:dbcluster_id' => 'Database Cluster',
 	'Class:DatabaseSchema/Attribute:dbcluster_id+' => '',
@@ -34,6 +36,8 @@ Dict::Add('EN US', 'English', 'English', array(
 
 	'Class:WebServer/Attribute:webcluster_list' => 'Web Clusters',
 	'Class:WebServer/Attribute:webcluster_list+' => '',
+	'Class:WebServer/Attribute:webcluster_id' => 'Web Cluster',
+	'Class:WebServer/Attribute:webcluster_id+' => '',
 
 	'Class:WebCluster' => 'Web Cluster',
 	'Class:WebCluster+' => '',
@@ -52,7 +56,17 @@ Dict::Add('EN US', 'English', 'English', array(
 
 	'Class:lnkWebServerToWebCluster' => 'Link Web Server / Web Cluster',
 	'Class:lnkWebServerToWebCluster+' => '',
-	
+
+	'Class:lnkDBClusterToSoftwareInstance/Attribute:dbcluster_id' => 'DB cluster',
+    'Class:lnkDBClusterToSoftwareInstance/Attribute:dbcluster_id+' => '',
+	'Class:lnkDBClusterToSoftwareInstance/Attribute:softwareinstance_id' => 'DB server',
+    'Class:lnkDBClusterToSoftwareInstance/Attribute:softwareinstance_id+' => '',
+
+	'Class:lnkWebClusterToSoftwareInstance/Attribute:webcluster_id' => 'Web cluster',
+    'Class:lnkWebClusterToSoftwareInstance/Attribute:webcluster_id+' => '',
+	'Class:lnkWebClusterToSoftwareInstance/Attribute:softwareinstance_id' => 'Web server',
+    'Class:lnkWebClusterToSoftwareInstance/Attribute:softwareinstance_id+' => '',
+
     'Class:Software/Attribute:type/Value:DBCluster' => 'DB Cluster',
     'Class:Software/Attribute:type/Value:DBCluster+' => 'DB Cluster',
     'Class:Software/Attribute:type/Value:WebCluster' => 'Web Cluster',
