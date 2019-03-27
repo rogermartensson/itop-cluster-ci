@@ -228,6 +228,10 @@
           <allow_target_creation>false</allow_target_creation> 
           <filter><![CDATA[SELECT SoftwareInstance WHERE finalclass IN ('WebCluster','WebServer')]]></filter>
         </field>
+        <field id="softwareinstance_name" xsi:type="AttributeExternalField" _delta="define">
+          <extkey_attcode>softwareinstance_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
         <field id="dbschema_list" xsi:type="AttributeLinkedSetIndirect" _delta="define">
           <linked_class>lnkDatabaseSchemaToWebApplication</linked_class>
           <ext_key_to_me>webapplication_id</ext_key_to_me>
