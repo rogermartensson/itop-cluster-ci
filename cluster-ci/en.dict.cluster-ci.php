@@ -50,12 +50,31 @@ Dict::Add('EN US', 'English', 'English', array(
 	'Class:WebApplication/Attribute:dbschema_list+' => '',
     'Class:WebApplication/Attribute:softwareinstance_id' => 'Web Server',
     'Class:WebApplication/Attribute:softwareinstance_id+' => '',
+    'Class:WebApplication/Attribute:lbaddress_id' => 'LB Address',
+    'Class:WebApplication/Attribute:lbaddress_id+' => '',
+
+	'Class:LoadBalancer' => 'Load Balancer',
+	'Class:LoadBalancer+' => '',
+	'Class:LoadBalancer/Attribute:lbnodes_list' => 'LB Nodes',
+	'Class:LoadBalancer/Attribute:lbnodes_list+' => '',
+	'Class:LoadBalancer/Attribute:lbaddresses_list' => 'LB Addresses',
+	'Class:LoadBalancer/Attribute:lbaddresses_list+' => '',
+
+	'Class:LBAddress' => 'LB Address',
+	'Class:LBAddress+' => '',
+	'Class:LBAddress/Attribute:loadbalancer_id' => 'Load Balancer',
+	'Class:LBAddress/Attribute:loadbalancer_id+' => '',
+	'Class:LBAddress/Attribute:webapp_list' => 'Web Applications',
+	'Class:LBAddress/Attribute:webapp_list+' => '',
 
 	'Class:lnkDBServerToDBCluster' => 'Link DB Server / DB Cluster',
 	'Class:lnkDBServerToDBCluster+' => '',
 
 	'Class:lnkWebServerToWebCluster' => 'Link Web Server / Web Cluster',
 	'Class:lnkWebServerToWebCluster+' => '',
+
+	'Class:lnkLoadBalancertToFunctionalCI' => 'Link Load Balancer / Functional CI',
+	'Class:lnkLoadBalancertToFunctionalCI+' => '',
 
 	'Class:lnkDBClusterToSoftwareInstance/Attribute:dbcluster_id' => 'DB cluster',
     'Class:lnkDBClusterToSoftwareInstance/Attribute:dbcluster_id+' => '',
@@ -71,5 +90,7 @@ Dict::Add('EN US', 'English', 'English', array(
     'Class:Software/Attribute:type/Value:DBCluster+' => 'DB Cluster',
     'Class:Software/Attribute:type/Value:WebCluster' => 'Web Cluster',
     'Class:Software/Attribute:type/Value:WebCluster+' => 'Web Cluster',
+    'Class:Software/Attribute:type/Value:LoadBalancer' => 'Load Balancer',
+    'Class:Software/Attribute:type/Value:LoadBalancer+' => 'Load Balancer',
 ));
 ?>

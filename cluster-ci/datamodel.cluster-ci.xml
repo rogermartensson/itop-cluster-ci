@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <itop_design xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0">
   <classes>
-    <class id="SoftwareInstance">
+    <class id="SoftwareInstance" _delta="must_exist">
       <fields>
         <field id="system_id" xsi:type="AttributeExternalKey">
           <is_null_allowed _delta="redefine">true</is_null_allowed>
@@ -14,6 +14,7 @@
             <values>
               <value id="DBCluster" _delta="define">DBCluster</value>
               <value id="WebCluster" _delta="define">WebCluster</value>
+              <value id="LoadBalancer" _delta="define">LoadBalancer</value>
             </values>
         </field>
     	</fields>
@@ -36,36 +37,15 @@
           <count_max>0</count_max>
         </field>
       </fields>
-      <methods>
-        <method id="GetRelationQueries" _delta="redefine">
-          <static>true</static>
-          <access>public</access>
-          <type>Overload-DBObject</type>
-          <code><![CDATA[       public static function GetRelationQueries($sRelCode)
-        {
-                switch ($sRelCode)
-                {
-                        case "impacts":
-                        $aRels = array(
-                          "WebApplication" => array("sQuery"=>"SELECT WebApplication AS db WHERE softwareinstance_id = :this->id", "bPropagate"=>true, "iDistance"=>5),
- 			  "WebCluster" => array("sQuery"=>"SELECT WebCluster AS webc JOIN lnkWebClusterToSoftwareInstance AS l1 ON l1.webcluster_id= webc.id WHERE l1.softwareinstance_id = :this->id", "bPropagate"=>true, "iDistance"=>10),
-                        );
-                        return array_merge($aRels, parent::GetRelationQueries($sRelCode));
-                        break;
-
-                        case 'depends on':
-                        $aRels = array(
-
-                        );
-                        return array_merge($aRels, parent::GetRelationQueries($sRelCode));
-                        break;
-
-                        default:
-                        return parent::GetRelationQueries($sRelCode);
-                }
-        }]]></code>
-        </method>
-      </methods>
+      <relations>
+        <relation id="impacts">
+          <neighbours>
+            <neighbour id="webcluster" _delta="define">
+              <attribute>webcluster_list</attribute>
+            </neighbour>
+          </neighbours>
+        </relation>
+      </relations>
       <presentation>
         <details>
           <items>
@@ -94,36 +74,15 @@
           <count_max>0</count_max>
         </field>
       </fields>
-      <methods>
-        <method id="GetRelationQueries" _delta="redefine">
-          <static>true</static>
-          <access>public</access>
-          <type>Overload-DBObject</type>
-          <code><![CDATA[       public static function GetRelationQueries($sRelCode)
-        {
-                switch ($sRelCode)
-                {
-                        case "impacts":
-                        $aRels = array(
-                          "DatabaseSchema" => array("sQuery"=>"SELECT DatabaseSchema AS db WHERE softwareinstance_id = :this->id", "bPropagate"=>true, "iDistance"=>5),
- 			  "DBCluster" => array("sQuery"=>"SELECT DBCluster AS dbc JOIN lnkDBClusterToSoftwareInstance AS l1 ON l1.dbcluster_id= dbc.id WHERE l1.softwareinstance_id = :this->id", "bPropagate"=>true, "iDistance"=>10),
-                        );
-                        return array_merge($aRels, parent::GetRelationQueries($sRelCode));
-                        break;
-
-                        case 'depends on':
-                        $aRels = array(
-
-                        );
-                        return array_merge($aRels, parent::GetRelationQueries($sRelCode));
-                        break;
-
-                        default:
-                        return parent::GetRelationQueries($sRelCode);
-                }
-        }]]></code>
-        </method>
-      </methods>
+      <relations>
+        <relation id="impacts">
+          <neighbours>
+            <neighbour id="dbcluster" _delta="define">
+              <attribute>dbcluster_list</attribute>
+            </neighbour>
+          </neighbours>
+        </relation>
+      </relations>
       <presentation>
         <details>
           <items>
@@ -132,6 +91,143 @@
             </item>
           </items>
         </details>
+      </presentation>
+    </class>
+    <class id="LoadBalancer" _delta="define">
+      <parent>SoftwareInstance</parent>
+      <properties>
+        <category>bizmodel,searchable</category>
+        <abstract>false</abstract>
+        <key_type>autoincrement</key_type>
+        <db_table>loadbalancer</db_table>
+        <db_key_field>id</db_key_field>
+        <db_final_class_field/>
+        <naming>
+          <format>%1$s</format>
+          <attributes>
+            <attribute id="name"/>
+          </attributes>
+        </naming>
+        <display_template/>
+        <icon>images/webcluster.png</icon>
+        <reconciliation>
+          <attributes>
+            <attribute id="name"/>
+            <attribute id="org_id"/>
+            <attribute id="organization_name"/>
+          </attributes>
+        </reconciliation>
+      </properties>
+      <fields>
+        <field id="lbnodes_list" xsi:type="AttributeLinkedSetIndirect">
+          <linked_class>lnkLoadBalancerToFunctionalCI</linked_class>
+          <ext_key_to_me>loadbalancer_id</ext_key_to_me>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+          <ext_key_to_remote>functionalci_id</ext_key_to_remote>
+          <duplicates/>
+        </field>
+        <field id="lbaddresses_list" xsi:type="AttributeLinkedSet">
+          <linked_class>LBAddress</linked_class>
+          <ext_key_to_me>loadbalancer_id</ext_key_to_me>
+          <edit_mode>in_place</edit_mode>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+        </field>
+      </fields>
+      <relations>
+        <relation id="impacts">
+          <neighbours>
+            <neighbour id="functionalci" _delta="define">
+              <query_down>SELECT FunctionalCI AS lb JOIN lnkLoadBalancerToFunctionalCI AS l1 ON l1.functionalci_id=lb.id WHERE l1.loadbalancer_id = :this-&gt;id</query_down>
+              <query_up>SELECT FunctionalCI AS lb JOIN lnkLoadBalancerToFunctionalCI AS l1 ON l1.functionalci_id=lb.id WHERE l1.loadbalancer_id = :this-&gt;id</query_up>
+            </neighbour>
+            <neighbour id="lbaddress" _delta="define">
+              <attribute>lbaddresses_list</attribute>
+            </neighbour>
+          </neighbours>
+        </relation>
+      </relations>
+      <methods />
+      <presentation>
+        <details>
+          <items>
+            <item id="name">
+              <rank>10</rank>
+            </item>
+            <item id="org_id">
+              <rank>20</rank>
+            </item>
+            <item id="status">
+              <rank>30</rank>
+            </item>
+            <item id="business_criticity">
+              <rank>40</rank>
+            </item>
+            <item id="software_id">
+              <rank>60</rank>
+            </item>
+            <item id="softwarelicence_id">
+              <rank>70</rank>
+            </item>
+            <item id="move2production">
+              <rank>90</rank>
+            </item>
+            <item id="description">
+              <rank>100</rank>
+            </item>
+            <item id="contacts_list">
+              <rank>110</rank>
+            </item>
+            <item id="documents_list">
+              <rank>120</rank>
+            </item>
+            <item id="tickets_list">
+              <rank>130</rank>
+            </item>
+            <item id="applicationsolution_list">
+              <rank>140</rank>
+            </item>
+            <item id="lbnodes_list">
+              <rank>150</rank>
+            </item>
+            <item id="lbaddresses_list">
+              <rank>155</rank>
+            </item>
+            <item id="providercontracts_list">
+              <rank>160</rank>
+            </item>
+            <item id="services_list">
+              <rank>170</rank>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="name">
+              <rank>10</rank>
+            </item>
+            <item id="org_id">
+              <rank>20</rank>
+            </item>
+            <item id="business_criticity">
+              <rank>30</rank>
+            </item>
+            <item id="move2production">
+              <rank>40</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="org_id">
+              <rank>10</rank>
+            </item>
+            <item id="business_criticity">
+              <rank>20</rank>
+            </item>
+          </items>
+        </list>
       </presentation>
     </class>
     <class id="DatabaseSchema" _delta="must_exist">
@@ -165,35 +261,15 @@
           <duplicates/>
         </field>
       </fields>
-      <methods>
-        <method id="GetRelationQueries" _delta="redefine">
-          <static>true</static>
-          <access>public</access>
-          <type>Overload-DBObject</type>
-          <code><![CDATA[	public static function GetRelationQueries($sRelCode)
-          {
-            switch ($sRelCode)
-            {
-              case "impacts":
-              $aRels = array(
-                "WebApplication" => array("sQuery"=>"SELECT WebApplication AS web JOIN lnkDatabaseSchemaToWebApplication AS l1 ON l1.webapplication_id=web.id WHERE l1.databaseinstance_id = :this->id", "bPropagate"=>true, "iDistance"=>10),
-              );
-              return array_merge($aRels, parent::GetRelationQueries($sRelCode));
-              break;
-              
-              case 'depends on':
-              $aRels = array(
-                "SoftwareInstance" => array("sQuery"=>"SELECT SoftwareInstance AS SI WHERE SI.id = :this->softwareinstance_id", "bPropagate"=>true, "iDistance"=>5),
-              );
-              return array_merge($aRels, parent::GetRelationQueries($sRelCode));
-              break;
-              
-              default:
-              return parent::GetRelationQueries($sRelCode);			
-            }
-         }]]></code>
-        </method>
-      </methods>
+      <relations>
+        <relation id="impacts" _delta="define">
+          <neighbours>
+            <neighbour id="webapplication" _delta="define">
+              <attribute>webapplications_list</attribute>
+            </neighbour>
+          </neighbours>
+        </relation>
+      </relations>
       <presentation>
         <details>
           <items>
@@ -240,54 +316,41 @@
           <ext_key_to_remote>databaseinstance_id</ext_key_to_remote>
           <duplicates/>
         </field>
+        <field id="lbaddress_id" xsi:type="AttributeExternalKey" _delta="define">
+          <sql>lbaddress_id</sql>
+          <target_class>LBAddress</target_class>
+          <is_null_allowed>true</is_null_allowed>
+          <on_target_delete>DEL_MANUAL</on_target_delete>
+          <allow_target_creation>false</allow_target_creation> 
+        </field>
+        <field id="lbaddress_name" xsi:type="AttributeExternalField" _delta="define">
+          <extkey_attcode>lbaddress_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
       </fields>
-      <methods>
-        <method id="GetRelationQueries" _delta="redefine">
-          <static>true</static>
-          <access>public</access>
-          <type>Overload-DBObject</type>
-          <code><![CDATA[       public static function GetRelationQueries($sRelCode)
-        {
-                switch ($sRelCode)
-                {
-                        case "impacts":
-                        $aRels = array(
-                        );
-                        return array_merge($aRels, parent::GetRelationQueries($sRelCode));
-                        break;
-
-                        case 'depends on':
-                        $aRels = array(
-                                "SoftwareInstance" => array("sQuery"=>"SELECT SoftwareInstance AS SI WHERE SI.id = :this->softwareinstance_id", "bPropagate"=>true, "iDistance"=>5),
-                                "DatabaseSchema" => array("sQuery"=>"SELECT DatabaseSchema AS db JOIN lnkDatabaseSchemaToWebApplication AS l1 ON l1.databaseinstance_id=db.id WHERE l1.webapplication_id = :this->id", "bPropagate"=>true, "iDistance"=>10),
-
-                        );
-                        return array_merge($aRels, parent::GetRelationQueries($sRelCode));
-                        break;
-
-                        default:
-                        return parent::GetRelationQueries($sRelCode);
-                }
-        }]]></code>
-        </method>
-      </methods>
+      <relations>
+        <relation id="impacts">
+          <neighbours>
+            <neighbour id="lbaddress" _delta="define">
+              <attribute>lbaddress_id</attribute>
+            </neighbour>
+          </neighbours>
+        </relation>
+      </relations>
       <presentation>
         <details>
           <items>
             <item id="webserver_id" _delta="delete">
               <rank>30</rank>
             </item>
+            <item id="lbaddress_id" _delta="define">
+              <rank>34</rank>
+            </item>
             <item id="softwareinstance_id" _delta="define">
               <rank>35</rank>
             </item>
             <item id="dbschema_list" _delta="define">
               <rank>115</rank>
-            </item>
-            <item id="providercontracts_list">
-              <rank>120</rank>
-            </item>
-            <item id="services_list">
-              <rank>130</rank>
             </item>
           </items>
         </details>
@@ -509,35 +572,16 @@
           <display_style>radio_vertical</display_style>
         </field>
       </fields>
-      <methods>
-        <method id="GetRelationQueries">
-          <static>true</static>
-          <access>public</access>
-          <type>Overload-DBObject</type>
-          <code><![CDATA[    public static function GetRelationQueries($sRelCode)
-            {
-                switch ($sRelCode)
-                {
-                    case "impacts":
-                    $aRels = array(
-                        "WebApplication" => array("sQuery"=>"SELECT WebApplication AS db WHERE softwareinstance_id = :this->id", "bPropagate"=>true, "iDistance"=>5),
-                    );
-                    return array_merge($aRels, parent::GetRelationQueries($sRelCode));
-                    break;
-                    
-                    case 'depends on':
-                    $aRels = array(
-                        "SoftwareInstance" => array("sQuery"=>"SELECT SoftwareInstance AS s JOIN lnkWebClusterToSoftwareInstance AS l1 ON l1.softwareinstance_id=s.id WHERE l1.webcluster_id = :this->id","bPropagate"=>true, "iDistance"=>10),
-                    );
-                    return array_merge($aRels, parent::GetRelationQueries($sRelCode));
-                    break;
-                    
-                    default:
-                    return parent::GetRelationQueries($sRelCode);            
-                }
-            }]]></code>
-        </method>
-      </methods>
+      <methods />
+      <relations>
+        <relation id="impacts" _delta="define">
+          <neighbours>
+            <neighbour id="webapplication" _delta="define">
+              <attribute>webapp_list</attribute>
+            </neighbour>
+          </neighbours>
+        </relation>
+      </relations>
       <presentation>
         <details>
           <items>
@@ -686,36 +730,16 @@
           <display_style>radio_vertical</display_style>
         </field>
       </fields>
-      <methods>
-        <method id="GetRelationQueries">
-          <static>true</static>
-          <access>public</access>
-          <type>Overload-DBObject</type>
-          <code><![CDATA[    public static function GetRelationQueries($sRelCode)
-            {
-                switch ($sRelCode)
-                {
-                    case "impacts":
-                    $aRels = array(
-                        "DatabaseSchema" => array("sQuery"=>"SELECT DatabaseSchema AS db WHERE softwareinstance_id = :this->id", "bPropagate"=>true, "iDistance"=>5),
-                    );
-                    return array_merge($aRels, parent::GetRelationQueries($sRelCode));
-                    break;
-                    
-                    case 'depends on':
-                    $aRels = array(
-                        "SoftwareInstance" => array("sQuery"=>"SELECT SoftwareInstance AS s JOIN lnkDBClusterToSoftwareInstance AS l1 ON l1.softwareinstance_id=s.id WHERE l1.dbcluster_id = :this->id","bPropagate"=>true, "iDistance"=>10),
-                        "LogicalVolume" => array("sQuery"=>"SELECT LogicalVolume AS volume JOIN lnkDBClusterToVolume AS l1 ON l1.volume_id=volume.id WHERE l1.dbcluster_id = :this->id", "bPropagate"=>true, "iDistance"=>5),
-                    );
-                    return array_merge($aRels, parent::GetRelationQueries($sRelCode));
-                    break;
-                    
-                    default:
-                    return parent::GetRelationQueries($sRelCode);            
-                }
-            }]]></code>
-        </method>
-      </methods>
+      <methods />
+      <relations>
+        <relation id="impacts" _delta="define">
+          <neighbours>
+            <neighbour id="databaseschema" _delta="define">
+              <attribute>dbschema_list</attribute>
+            </neighbour>
+          </neighbours>
+        </relation>
+      </relations>
       <presentation>
         <details>
           <items>
@@ -970,7 +994,6 @@
         </list>
       </presentation>
     </class>
-
     <class id="lnkDBServerToDBCluster" _delta="define">
       <parent>cmdbAbstractObject</parent>
       <properties>
@@ -1135,6 +1158,226 @@
         </list>
       </presentation>
     </class>
+    <class id="LBAddress" _delta="define">
+      <parent>FunctionalCI</parent>
+      <properties>
+        <category>bizmodel,searchable,structure</category>
+        <abstract>false</abstract>
+        <key_type>autoincrement</key_type>
+        <db_table>lbaddress</db_table>
+        <db_key_field>id</db_key_field>
+        <db_final_class_field>finalclass</db_final_class_field>
+        <naming>
+          <format>%1$s</format>
+          <attributes>
+            <attribute id="name" />
+          </attributes>
+        </naming>
+        <display_template/>
+        <icon/>
+        <reconciliation>
+          <attributes>
+            <attribute id="name"/>
+            <attribute id="org_id"/>
+            <attribute id="organization_name"/>
+            <attribute id="loadbalancer_id" />
+            <attribute id="loadbalancer_name" />
+            <attribute id="finalclass" />
+          </attributes>
+        </reconciliation>
+      </properties>
+      <fields>
+        <field id="loadbalancer_id" xsi:type="AttributeExternalKey">
+          <sql>loadbalancer_id</sql>
+          <target_class>LoadBalancer</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_MANUAL</on_target_delete>
+          <allow_target_creation>false</allow_target_creation> 
+        </field>
+        <field id="loadbalancer_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>loadbalancer_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+        <field id="webapp_list" xsi:type="AttributeLinkedSet">
+          <linked_class>WebApplication</linked_class>
+          <ext_key_to_me>lbaddress_id</ext_key_to_me>
+          <edit_mode>in_place</edit_mode>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+        </field>
+        <field id="address" xsi:type="AttributeString">
+          <sql>address</sql>
+          <is_null_allowed>false</is_null_allowed>
+        </field>
+        <field id="port" xsi:type="AttributeString">
+          <sql>port</sql>
+          <is_null_allowed>false</is_null_allowed>
+        </field>
+      </fields>
+      <methods />
+      <presentation>
+        <details>
+          <items _delta="merge">
+            <item id="name">
+              <rank>10</rank>
+            </item>
+            <item id="org_id">
+              <rank>20</rank>
+            </item>
+            <item id="business_criticity">
+              <rank>30</rank>
+            </item>
+            <item id="loadbalancer_id">
+              <rank>40</rank>
+            </item>
+            <item id="address">
+              <rank>50</rank>
+            </item>
+            <item id="port">
+              <rank>60</rank>
+            </item>
+            <item id="move2production">
+              <rank>70</rank>
+            </item>
+            <item id="description">
+              <rank>80</rank>
+            </item>
+            <item id="contacts_list">
+              <rank>90</rank>
+            </item>
+            <item id="documents_list">
+              <rank>100</rank>
+            </item>
+            <item id="applicationsolution_list">
+              <rank>110</rank>
+            </item>
+            <item id="webapp_list">
+              <rank>115</rank>
+            </item>
+            <item id="providercontracts_list">
+              <rank>100</rank>
+            </item>
+            <item id="services_list">
+              <rank>120</rank>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="name">
+              <rank>10</rank>
+            </item>
+            <item id="org_id">
+              <rank>20</rank>
+            </item>
+            <item id="business_criticity">
+              <rank>30</rank>
+            </item>
+            <item id="move2production">
+              <rank>40</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="finalclass">
+              <rank>10</rank>
+            </item>
+            <item id="org_id">
+              <rank>20</rank>
+            </item>
+            <item id="business_criticity">
+              <rank>30</rank>
+            </item>
+            <item id="loadbalancer_id">
+              <rank>40</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
+    <class id="lnkLoadBalancerToFunctionalCI" _delta="define">
+      <parent>cmdbAbstractObject</parent>
+      <properties>
+        <is_link>1</is_link>
+        <category>bizmodel</category>
+        <abstract>false</abstract>
+        <key_type>autoincrement</key_type>
+        <db_table>lnkloadbalancertofunctionalci</db_table>
+        <db_key_field>id</db_key_field>
+        <db_final_class_field/>
+        <naming>
+          <format>%1$s %2$s</format>
+          <attributes>
+            <attribute id="functionalci_id"/>
+            <attribute id="loadbalancer_id"/>
+          </attributes>
+        </naming>
+        <display_template/>
+        <icon/>
+        <reconciliation>
+          <attributes>
+            <attribute id="functionalci_id"/>
+            <attribute id="loadbalancer_id"/>
+          </attributes>
+        </reconciliation>
+      </properties>
+      <fields>
+        <field id="functionalci_id" xsi:type="AttributeExternalKey">
+          <sql>functionalci_id</sql>
+          <target_class>FunctionalCI</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+        <field id="functionalci_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>functionalci_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+        <field id="loadbalancer_id" xsi:type="AttributeExternalKey">
+          <sql>loadbalancer_id</sql>
+          <target_class>LoadBalancer</target_class>
+          <is_null_allowed>false</is_null_allowed>
+          <on_target_delete>DEL_AUTO</on_target_delete>
+        </field>
+        <field id="loadbalancer_name" xsi:type="AttributeExternalField">
+          <extkey_attcode>loadbalancer_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
+      </fields>
+      <methods/>
+      <presentation>
+        <details>
+          <items>
+            <item id="functionalci_id">
+              <rank>10</rank>
+            </item>
+            <item id="loadbalancer_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </details>
+        <search>
+          <items>
+            <item id="functionalci_id">
+              <rank>10</rank>
+            </item>
+            <item id="loadlbalancer_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </search>
+        <list>
+          <items>
+            <item id="functionalci_id">
+              <rank>10</rank>
+            </item>
+            <item id="loadbalancer_id">
+              <rank>20</rank>
+            </item>
+          </items>
+        </list>
+      </presentation>
+    </class>
   </classes>
 
   <menus>
@@ -1146,6 +1389,10 @@
               <dashlet id="111" xsi:type="DashletBadge" _delta="define">
                 <rank>111</rank>
                 <class>DBCluster</class>
+              </dashlet>
+              <dashlet id="112" xsi:type="DashletBadge" _delta="define">
+                <rank>112</rank>
+                <class>WebCluster</class>
               </dashlet>
             </dashlets>
           </cell>
