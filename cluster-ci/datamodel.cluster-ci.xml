@@ -169,6 +169,13 @@
           <ext_key_to_remote>functionalci_id</ext_key_to_remote>
           <duplicates/>
         </field>
+        <field id="lbaddresses_list" xsi:type="AttributeLinkedSet">
+          <linked_class>LBAddress</linked_class>
+          <ext_key_to_me>loadbalancer_id</ext_key_to_me>
+          <edit_mode>in_place</edit_mode>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+        </field>
       </fields>
       <methods>
         <method id="GetRelationQueries" _delta="redefine">
@@ -241,6 +248,9 @@
             </item>
             <item id="lbnodes_list">
               <rank>150</rank>
+            </item>
+            <item id="lbaddresses_list">
+              <rank>155</rank>
             </item>
             <item id="providercontracts_list">
               <rank>160</rank>
@@ -380,6 +390,17 @@
           <ext_key_to_remote>databaseinstance_id</ext_key_to_remote>
           <duplicates/>
         </field>
+        <field id="lbaddress_id" xsi:type="AttributeExternalKey" _delta="define">
+          <sql>lbaddress_id</sql>
+          <target_class>LBAddress</target_class>
+          <is_null_allowed>true</is_null_allowed>
+          <on_target_delete>DEL_MANUAL</on_target_delete>
+          <allow_target_creation>false</allow_target_creation> 
+        </field>
+        <field id="lbaddress_name" xsi:type="AttributeExternalField" _delta="define">
+          <extkey_attcode>lbaddress_id</extkey_attcode>
+          <target_attcode>name</target_attcode>
+        </field>
       </fields>
       <methods>
         <method id="GetRelationQueries" _delta="redefine">
@@ -417,17 +438,14 @@
             <item id="webserver_id" _delta="delete">
               <rank>30</rank>
             </item>
+            <item id="lbaddress_id" _delta="define">
+              <rank>34</rank>
+            </item>
             <item id="softwareinstance_id" _delta="define">
               <rank>35</rank>
             </item>
             <item id="dbschema_list" _delta="define">
               <rank>115</rank>
-            </item>
-            <item id="providercontracts_list">
-              <rank>120</rank>
-            </item>
-            <item id="services_list">
-              <rank>130</rank>
             </item>
           </items>
         </details>
@@ -1304,7 +1322,7 @@
         </reconciliation>
       </properties>
       <fields>
-        <field id="loadbalancer_id" xsi:type="AttributeExternalKey" _delta="define">
+        <field id="loadbalancer_id" xsi:type="AttributeExternalKey">
           <sql>loadbalancer_id</sql>
           <target_class>LoadBalancer</target_class>
           <is_null_allowed>false</is_null_allowed>
@@ -1315,9 +1333,23 @@
           <extkey_attcode>loadbalancer_id</extkey_attcode>
           <target_attcode>name</target_attcode>
         </field>
+        <field id="webapp_list" xsi:type="AttributeLinkedSet">
+          <linked_class>WebApplication</linked_class>
+          <ext_key_to_me>lbaddress_id</ext_key_to_me>
+          <edit_mode>in_place</edit_mode>
+          <count_min>0</count_min>
+          <count_max>0</count_max>
+        </field>
+        <field id="address" xsi:type="AttributeString">
+          <sql>address</sql>
+          <is_null_allowed>false</is_null_allowed>
+        </field>
+        <field id="port" xsi:type="AttributeString">
+          <sql>port</sql>
+          <is_null_allowed>false</is_null_allowed>
+        </field>
       </fields>
       <methods>
-        <!--
         <method id="GetRelationQueries" _delta="redefine">
           <static>true</static>
           <access>public</access>
@@ -1329,7 +1361,8 @@
                 {
                     case 'depends on':
                     $aRels = array(
-                        "LoadBalancer" => array("sQuery"=>"SELECT LoadBalancer AS lb WHERE lb.loadbalancer_id = :this->loadbalancer_id","bPropagate"=>true, "iDistance"=>10),
+                        "LoadBalancer" => array("sQuery"=>"SELECT LoadBalancer AS lb WHERE lb.id = :this->loadbalancer_id","bPropagate"=>true, "iDistance"=>10),
+                        "WebApplication" => array("sQuery"=>"SELECT WebApplication AS wa WHERE wa.lbaddress_id = :this->id","bPropagate"=>true, "iDistance"=>10),
                     );
                     return array_merge($aRels, parent::GetRelationQueries($sRelCode));
                     break;
@@ -1338,18 +1371,8 @@
                     return parent::GetRelationQueries($sRelCode);            
                 }
             }]]></code>
-        </method> -->
+        </method>
       </methods>
-      <relations>
-        <relation id="impacts">
-          <neighbours>
-            <neighbour id="LoadBalancer" _delta="define">
-              <query_down>SELECT LoadBalancer WHERE loadbalancer_id = :this->loadbalancer_id</query_down>
-              <query_up>SELECT LBAddress WHERE loadbalancer_id = :this->loadbalancer_id</query_up>
-            </neighbour>
-          </neighbours>
-        </relation>
-      </relations>
       <presentation>
         <details>
           <items _delta="merge">
@@ -1363,28 +1386,37 @@
               <rank>30</rank>
             </item>
             <item id="loadbalancer_id">
-              <rank>35</rank>
-            </item>
-            <item id="move2production">
               <rank>40</rank>
             </item>
-            <item id="description">
+            <item id="address">
               <rank>50</rank>
             </item>
-            <item id="contacts_list">
+            <item id="port">
               <rank>60</rank>
             </item>
-            <item id="documents_list">
+            <item id="move2production">
               <rank>70</rank>
             </item>
-            <item id="applicationsolution_list">
+            <item id="description">
+              <rank>80</rank>
+            </item>
+            <item id="contacts_list">
               <rank>90</rank>
+            </item>
+            <item id="documents_list">
+              <rank>100</rank>
+            </item>
+            <item id="applicationsolution_list">
+              <rank>110</rank>
+            </item>
+            <item id="webapp_list">
+              <rank>115</rank>
             </item>
             <item id="providercontracts_list">
               <rank>100</rank>
             </item>
             <item id="services_list">
-              <rank>110</rank>
+              <rank>120</rank>
             </item>
           </items>
         </details>
@@ -1415,7 +1447,7 @@
             <item id="business_criticity">
               <rank>30</rank>
             </item>
-            <item id="system_id">
+            <item id="loadbalancer_id">
               <rank>40</rank>
             </item>
           </items>
