@@ -17,6 +17,8 @@ These new Classes are visible and useable from the iTop web interface.
 * WebServer (extended)
 * Database Schema (extended)
 * Web Application
+* Load Balancer
+* LB Address
 
 ### DBServer / DBCluster / Database Schema
 
@@ -77,3 +79,17 @@ Also from the original work from lndevnull, there is a tab for adding Database S
 
 For REST-users do note that webserver_id and webserver_name is removed from WebApplication. Please use softwareinstance_id and
 softwareinstance_name.
+Also from the original work from lndevnull, there is a tab for adding Database Schemas.
+
+### LoadBalancer / LBAddress
+Two new classes that can be used to document and describe relations with a
+Load Balancer.
+
+#### LoadBalancer
+LoadBalancer is used to describe the logical instance that is the functional load balancer. This can be seen as the software that runs Load Balancer.
+
+The FunctionalCI that the software is run on is later documented as their own CI and then connected to the LoadBalancer class as Nodes.
+
+#### LBAddress
+The Load Balancer is seen as the software that balances an address. The address
+is documented as a LBAddress CI. This CI must be connected to a LoadBalancer but can also be connected to a SoftwareInstance.
