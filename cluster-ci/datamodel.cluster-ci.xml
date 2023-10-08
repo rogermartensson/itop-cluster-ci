@@ -240,7 +240,6 @@
         <field id="dbserver_id" _delta="delete" />
         <field id="dbserver_name" _delta="delete"/>
         <field id="softwareinstance_id" xsi:type="AttributeExternalKey" _delta="define">
-          <sql>dbserver_id</sql>
           <sql>softwareinstance_id</sql>
           <target_class>SoftwareInstance</target_class>
           <is_null_allowed>false</is_null_allowed>
@@ -296,7 +295,6 @@
         <field id="webserver_id" _delta="delete" />
         <field id="webserver_name" _delta="delete"/>
         <field id="softwareinstance_id" xsi:type="AttributeExternalKey" _delta="define">
-          <sql>webserver_id</sql>
           <sql>softwareinstance_id</sql>
           <target_class>SoftwareInstance</target_class>
           <is_null_allowed>false</is_null_allowed>
